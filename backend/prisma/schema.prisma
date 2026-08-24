@@ -1,0 +1,40 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // A user can have many files
+  files        File[]   
+
+  @@map("users") // Best practice: map to lowercase plural table names
+}
+
+model File {
+  id           String   @id @default(uuid())
+  originalName String
+  storageKey   String   @unique // The internal name saved in S3
+  sizeBytes    Int      // Used to enforce the 100MB limit
+  mimeType     String   // e.g., "application/pdf"
+  isPublic     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Foreign key relation to the User table
+  ownerId      String
+  owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@map("files")
+}
