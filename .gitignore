@@ -1,0 +1,8 @@
+/backend/node_modules
+/backend/dist
+/backend/.agents
+/backend/.claude
+/backend/.windsurf
+/backend/test
+
+/.env
