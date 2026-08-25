@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
 import { FileService } from './file.service';
 import { RequestUploadUrlDto, ConfirmUploadDto } from './dto/file.dto';
 import { AuthGuard } from '../auth/auth.guard';
@@ -26,5 +26,13 @@ export class FileController {
     @CurrentUser() user: JwtPayload,
   ): Promise<File> {
     return this.fileService.confirmUpload(dto, user.sub);
+  }
+  @Get(':id/download')
+  async downloadFile(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<{ downloadUrl: string }> {
+    // We pass the user.sub (userId) so the service can verify ownership if the file is private
+    return this.fileService.getDownloadUrl(id, user.sub);
   }
 }
