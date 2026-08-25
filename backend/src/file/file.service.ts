@@ -117,4 +117,45 @@ export class FileService {
       throw new InternalServerErrorException('Could not generate download URL');
     }
   }
+
+  // Get all files for a specific user
+  async getUserFiles(userId: string): Promise<File[]> {
+    // Explicitly define files as an array of File objects
+    const files: File[] = await this.prisma.file.findMany({
+      where: { ownerId: userId },
+      orderBy: { createdAt: 'desc' }, // Show newest files first
+    });
+
+    return files;
+  }
+
+  // Toggle the public/private status of a file
+  async toggleFileAccess(
+    fileId: string,
+    userId: string,
+    isPublic: boolean,
+  ): Promise<File> {
+    // First, verify the file exists AND belongs to the user trying to change it
+    const file = await this.prisma.file.findUnique({
+      where: { id: fileId },
+    });
+
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    if (file.ownerId !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to modify this file.',
+      );
+    }
+
+    // Update the record in the database
+    const updatedFile: File = await this.prisma.file.update({
+      where: { id: fileId },
+      data: { isPublic },
+    });
+
+    return updatedFile;
+  }
 }

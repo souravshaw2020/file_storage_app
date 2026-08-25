@@ -1,9 +1,21 @@
-import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { FileService } from './file.service';
-import { RequestUploadUrlDto, ConfirmUploadDto } from './dto/file.dto';
+import {
+  RequestUploadUrlDto,
+  ConfirmUploadDto,
+  ToggleAccessDto,
+} from './dto/file.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser, type JwtPayload } from '../auth/current-user.decorator';
-import { File } from '@prisma/client'; // <-- Import the Prisma File type
+import { File } from '@prisma/client';
 
 @UseGuards(AuthGuard)
 @Controller('files')
@@ -27,6 +39,7 @@ export class FileController {
   ): Promise<File> {
     return this.fileService.confirmUpload(dto, user.sub);
   }
+
   @Get(':id/download')
   async downloadFile(
     @Param('id') id: string,
@@ -34,5 +47,21 @@ export class FileController {
   ): Promise<{ downloadUrl: string }> {
     // We pass the user.sub (userId) so the service can verify ownership if the file is private
     return this.fileService.getDownloadUrl(id, user.sub);
+  }
+
+  // 1. New Endpoint: Get all files for the logged-in user
+  @Get()
+  async getUserDashboard(@CurrentUser() user: JwtPayload): Promise<File[]> {
+    return this.fileService.getUserFiles(user.sub);
+  }
+
+  // New Endpoint: Change file to public or private
+  @Patch(':id/access')
+  async toggleAccess(
+    @Param('id') fileId: string,
+    @Body() dto: ToggleAccessDto,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<File> {
+    return this.fileService.toggleFileAccess(fileId, user.sub, dto.isPublic);
   }
 }

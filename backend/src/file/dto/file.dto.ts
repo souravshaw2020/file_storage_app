@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsNotEmpty, Max } from 'class-validator';
+import {
+  IsBoolean,
+  IsString,
+  IsNumber,
+  IsNotEmpty,
+  Max,
+} from 'class-validator';
 
 export class RequestUploadUrlDto {
   @IsString()
@@ -29,4 +35,9 @@ export class ConfirmUploadDto {
 
   @IsNumber()
   sizeBytes!: number;
+}
+
+export class ToggleAccessDto {
+  @IsBoolean()
+  isPublic!: boolean;
 }
