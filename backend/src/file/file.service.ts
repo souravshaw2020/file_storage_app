@@ -1,10 +1,20 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-redundant-type-constituents */
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { PrismaService } from '../prisma/prisma.service';
 import { RequestUploadUrlDto, ConfirmUploadDto } from './dto/file.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { File } from '@prisma/client';
 
 @Injectable()
 export class FileService {
@@ -62,5 +72,49 @@ export class FileService {
     });
 
     return file;
+  }
+
+  async getDownloadUrl(
+    fileId: string,
+    requestingUserId?: string,
+  ): Promise<{ downloadUrl: string }> {
+    // 1. Find the file in the database
+    const file: File | null = await this.prisma.file.findUnique({
+      where: { id: fileId },
+    });
+
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    // 2. Authorization Check
+    if (!file.isPublic) {
+      // If it's private, a userId MUST be provided, and it MUST match the owner
+      if (!requestingUserId) {
+        throw new ForbiddenException('This file is private. Please log in.');
+      }
+      if (file.ownerId !== requestingUserId) {
+        throw new ForbiddenException(
+          'You do not have permission to access this file.',
+        );
+      }
+    }
+
+    // 3. Generate the S3 GetObject URL
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: file.storageKey,
+      ResponseContentDisposition: `attachment; filename="${file.originalName}"`, // Forces the browser to download the file instead of just viewing it
+    });
+
+    try {
+      // Generate a URL that expires in 1 hour (3600 seconds)
+      const downloadUrl: string = await getSignedUrl(this.s3Client, command, {
+        expiresIn: 3600,
+      });
+      return { downloadUrl };
+    } catch {
+      throw new InternalServerErrorException('Could not generate download URL');
+    }
   }
 }
