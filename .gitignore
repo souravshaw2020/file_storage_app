@@ -4,5 +4,6 @@
 /backend/.claude
 /backend/.windsurf
 /backend/test
+/backend/prisma
 
 /.env
