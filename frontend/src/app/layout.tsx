@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+import AuthGuard from "@/components/AuthGuard";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -10,17 +10,19 @@ export const metadata: Metadata = {
   description: "Upload, manage, and share your files securely.",
 };
 
-export default function RootLayout({
+export default function DashboardLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Toaster position="top-right" />
-        {children}
-      </body>
-    </html>
+    <AuthGuard>
+      <main className="flex min-h-screen">
+        {/* You can add your Sidebar and Top Navbar here later */}
+        <div className="flex-1 p-6">
+          {children}
+        </div>
+      </main>
+    </AuthGuard>
   );
 }
