@@ -9,10 +9,16 @@ export const AuthAPI = {
   login: (data: { email: string; password: string }) =>
     apiClient.post("/auth/login", data),
 
-  logout: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      window.location.href = '/login'; // Force a hard redirect to clear client state
+  // Updated to hit the backend endpoint
+  logout: async () => {
+    try {
+      await apiClient.post("/auth/logout");
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     }
-  }
+  },
 };
