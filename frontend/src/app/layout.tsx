@@ -1,28 +1,38 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import AuthGuard from "@/components/AuthGuard";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/lib/hooks/useAuth";
 
-const inter = Inter({ subsets: ["latin"] });
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Secure File Storage",
   description: "Upload, manage, and share your files securely.",
 };
 
-export default function DashboardLayout({
+export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <AuthGuard>
-      <main className="flex min-h-screen">
-        {/* You can add your Sidebar and Top Navbar here later */}
-        <div className="flex-1 p-6">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body>
+        {/* 2. Wrap the children inside the AuthProvider */}
+        <AuthProvider>
+          <Toaster position="top-right" />
           {children}
-        </div>
-      </main>
-    </AuthGuard>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

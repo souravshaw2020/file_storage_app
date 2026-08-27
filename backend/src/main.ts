@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(cookieParser());
+
   // Enable CORS so the React/Next.js frontend can communicate with this API
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3001',
@@ -19,8 +21,6 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // Throws an error if extra fields are sent
     }),
   );
-
-  app.use(cookieParser());
 
   await app.listen(process.env.PORT ?? 3000);
 }

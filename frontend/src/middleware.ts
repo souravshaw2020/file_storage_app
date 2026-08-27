@@ -1,18 +1,17 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get("token")?.value;
 
-  // Protect the dashboard route
-  if (!token && request.nextUrl.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  // If no token exists and the user is trying to access /dashboard
+  if (!token && request.nextUrl.pathname.startsWith("/dashboard")) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
-  
+
   return NextResponse.next();
 }
 
-// Target specific routes for the middleware to run on
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ["/dashboard/:path*"],
 };
