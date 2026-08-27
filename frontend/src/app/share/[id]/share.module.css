@@ -1,0 +1,68 @@
+.container {
+  min-height: 100vh;
+  background-color: #fff5f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Nunito', 'Inter', sans-serif;
+  color: #5a4b5c;
+}
+
+.card {
+  background: white;
+  padding: 50px 40px;
+  border-radius: 40px;
+  box-shadow: 0 15px 35px rgba(255, 143, 171, 0.15);
+  width: 100%;
+  max-width: 500px;
+  border: 3px solid #ffe5ec;
+  text-align: center;
+}
+
+.iconWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ff8fab;
+  margin: 0 0 10px 0;
+  word-break: break-all;
+}
+
+.subtitle {
+  color: #888;
+  margin-bottom: 30px;
+  font-size: 1rem;
+}
+
+.downloadBtn {
+  background-color: #a2d2ff;
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 99px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.downloadBtn:hover {
+  background-color: #bde0fe;
+  transform: translateY(-2px);
+}
+
+.errorText {
+  color: #fb6f92;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-top: 15px;
+}

@@ -158,4 +158,43 @@ export class FileService {
 
     return updatedFile;
   }
+
+  // Get a shared download URL for a public file
+  async getSharedDownloadUrl(fileId: string) {
+    const file = await this.prisma.file.findUnique({
+      where: { id: fileId },
+    });
+
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    if (!file.isPublic) {
+      throw new ForbiddenException(
+        'This file is private and cannot be accessed via a share link',
+      );
+    }
+
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: file.storageKey,
+      ResponseContentDisposition: `attachment; filename="${file.originalName}"`,
+    });
+
+    try {
+      const downloadUrl = await getSignedUrl(this.s3Client, command, {
+        expiresIn: 3600,
+      });
+
+      return {
+        downloadUrl,
+        originalName: file.originalName,
+        sizeBytes: file.sizeBytes,
+      };
+    } catch {
+      throw new InternalServerErrorException(
+        'Could not generate shared download URL',
+      );
+    }
+  }
 }

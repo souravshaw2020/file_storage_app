@@ -64,4 +64,9 @@ export class FileController {
   ): Promise<File> {
     return this.fileService.toggleFileAccess(fileId, user.sub, dto.isPublic);
   }
+
+  @Get('share/:id')
+  async getSharedFile(@Param('id') id: string) {
+    return this.fileService.getSharedDownloadUrl(id);
+  }
 }

@@ -1,3 +1,4 @@
+// src/app/dashboard/page.tsx
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -125,6 +126,12 @@ export default function DashboardPage() {
     }
   };
 
+  const handleCopyLink = (fileId: string) => {
+    const url = `${window.location.origin}/share/${fileId}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Share link copied to clipboard.");
+  };
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -184,12 +191,23 @@ export default function DashboardPage() {
                 Public
               </label>
 
-              <button
-                className={styles.downloadBtn}
-                onClick={() => handleDownload(file.id)}
-              >
-                Download
-              </button>
+              <div style={{ display: "flex", gap: "10px" }}>
+                {file.isPublic && (
+                  <button
+                    className={styles.downloadBtn} // Reusing the button style
+                    style={{ backgroundColor: "#ffc2d1", color: "white" }}
+                    onClick={() => handleCopyLink(file.id)}
+                  >
+                    Copy Link
+                  </button>
+                )}
+                <button
+                  className={styles.downloadBtn}
+                  onClick={() => handleDownload(file.id)}
+                >
+                  Download
+                </button>
+              </div>
             </div>
           </div>
         ))}
