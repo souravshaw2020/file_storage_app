@@ -1,15 +1,19 @@
 import { apiClient } from './client';
 
-// Representing the File resource
 export const FileAPI = {
-  // GET /files - Retrieve collection
   getDashboardFiles: () => apiClient.get('/files'),
   
-  // POST /files/upload-url - Create a new upload session
   getUploadUrl: (data: { fileName: string; mimeType: string; sizeBytes: number }) => 
     apiClient.post('/files/upload-url', data),
     
-  // PATCH /files/:id/access - Partially update a resource (toggle visibility)
+  // New: Confirm the upload with the backend
+  confirmUpload: (data: { storageKey: string; originalName: string; mimeType: string; sizeBytes: number }) => 
+    apiClient.post('/files/confirm', data),
+
+  // New: Get a secure download link
+  getDownloadUrl: (fileId: string) => 
+    apiClient.get(`/files/${fileId}/download`),
+    
   toggleAccess: (fileId: string, isPublic: boolean) => 
     apiClient.patch(`/files/${fileId}/access`, { isPublic }),
 };
