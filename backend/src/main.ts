@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -22,6 +23,24 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  // await app.listen(process.env.PORT ?? 3000);
+  await app.init();
+
+  // Return the underlying Express instance
+  return app.getHttpAdapter().getInstance();
 }
-bootstrap();
+
+// 1. If running locally, start the traditional server
+if (process.env.NODE_ENV !== 'production') {
+  bootstrap().then((expressApp) => {
+    expressApp.listen(process.env.PORT || 3000);
+  });
+}
+
+// 2. If running on Vercel, export the serverless handler
+export default async function handler(req: any, res: any) {
+  const expressApp = await bootstrap();
+  expressApp(req, res);
+}
+
+// bootstrap();
