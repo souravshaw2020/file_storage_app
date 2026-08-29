@@ -13,7 +13,8 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { PrismaService } from '../prisma/prisma.service';
 import { RequestUploadUrlDto, ConfirmUploadDto } from './dto/file.dto';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 @Injectable()
 export class FileService {
@@ -35,7 +36,7 @@ export class FileService {
   async generateUploadUrl(dto: RequestUploadUrlDto, userId: string) {
     // 1. Generate a unique storage key to prevent file overwrites
     const extension = dto.fileName.split('.').pop();
-    const storageKey = `${userId}/${uuidv4()}.${extension}`;
+    const storageKey = `${userId}/${randomUUID()}.${extension}`;
 
     // 2. Create the PutObject command
     const command = new PutObjectCommand({
