@@ -14,7 +14,6 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { PrismaService } from '../prisma/prisma.service';
 import { RequestUploadUrlDto, ConfirmUploadDto } from './dto/file.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { File } from '@prisma/client';
 
 @Injectable()
 export class FileService {
@@ -79,7 +78,7 @@ export class FileService {
     requestingUserId?: string,
   ): Promise<{ downloadUrl: string }> {
     // 1. Find the file in the database
-    const file: File | null = await this.prisma.file.findUnique({
+    const file = await this.prisma.file.findUnique({
       where: { id: fileId },
     });
 
@@ -119,9 +118,8 @@ export class FileService {
   }
 
   // Get all files for a specific user
-  async getUserFiles(userId: string): Promise<File[]> {
-    // Explicitly define files as an array of File objects
-    const files: File[] = await this.prisma.file.findMany({
+  async getUserFiles(userId: string) {
+    const files = await this.prisma.file.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: 'desc' }, // Show newest files first
     });
@@ -130,11 +128,7 @@ export class FileService {
   }
 
   // Toggle the public/private status of a file
-  async toggleFileAccess(
-    fileId: string,
-    userId: string,
-    isPublic: boolean,
-  ): Promise<File> {
+  async toggleFileAccess(fileId: string, userId: string, isPublic: boolean) {
     // First, verify the file exists AND belongs to the user trying to change it
     const file = await this.prisma.file.findUnique({
       where: { id: fileId },
@@ -151,7 +145,7 @@ export class FileService {
     }
 
     // Update the record in the database
-    const updatedFile: File = await this.prisma.file.update({
+    const updatedFile = await this.prisma.file.update({
       where: { id: fileId },
       data: { isPublic },
     });

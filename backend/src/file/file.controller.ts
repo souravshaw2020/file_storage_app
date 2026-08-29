@@ -15,7 +15,6 @@ import {
 } from './dto/file.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser, type JwtPayload } from '../auth/current-user.decorator';
-import { File } from '@prisma/client';
 
 @UseGuards(AuthGuard)
 @Controller('files')
@@ -36,7 +35,7 @@ export class FileController {
   async confirmUpload(
     @Body() dto: ConfirmUploadDto,
     @CurrentUser() user: JwtPayload,
-  ): Promise<File> {
+  ) {
     return this.fileService.confirmUpload(dto, user.sub);
   }
 
@@ -51,7 +50,7 @@ export class FileController {
 
   // 1. New Endpoint: Get all files for the logged-in user
   @Get()
-  async getUserDashboard(@CurrentUser() user: JwtPayload): Promise<File[]> {
+  async getUserDashboard(@CurrentUser() user: JwtPayload) {
     return this.fileService.getUserFiles(user.sub);
   }
 
@@ -61,7 +60,7 @@ export class FileController {
     @Param('id') fileId: string,
     @Body() dto: ToggleAccessDto,
     @CurrentUser() user: JwtPayload,
-  ): Promise<File> {
+  ) {
     return this.fileService.toggleFileAccess(fileId, user.sub, dto.isPublic);
   }
 
