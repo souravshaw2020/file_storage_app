@@ -29,10 +29,12 @@ export class AuthController {
   ): Promise<{ message: string }> {
     const { access_token } = await this.authService.login(dto);
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.cookie('token', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     });
@@ -44,10 +46,12 @@ export class AuthController {
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response): { message: string } {
     // Overwrite the cookie with a blank value and an expired date
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
     });
 
