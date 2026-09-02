@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LogIn } from 'lucide-react';
 import { AuthAPI } from '@/lib/api/auth';
@@ -9,7 +8,6 @@ import toast from 'react-hot-toast';
 import styles from '../auth.module.css';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -19,10 +17,14 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // 1. Send credentials to the backend.
+      // The backend MUST respond with a Set-Cookie header (e.g., token=...; HttpOnly; Path=/;)
       await AuthAPI.login({ email, password });
+      
       toast.success('Welcome back!');
       
-      // Force a hard navigation to bypass cache and trigger middleware
+      // 2. Force a hard navigation.
+      // This guarantees the Next.js middleware runs on the server and sees the new httpOnly cookie.
       window.location.href = '/dashboard';
     } catch (error) {
       toast.error('Invalid email or password.');

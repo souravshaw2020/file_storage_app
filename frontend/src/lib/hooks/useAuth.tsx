@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { apiClient } from "@/lib/api/client";
 
 // 1. Define the shape of your User and Context
 interface User {
@@ -18,7 +19,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (token: string, userData: User) => void;
+  login: (userData: User) => void;
   logout: () => void;
 }
 
@@ -33,13 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkUserSession = async () => {
       try {
-        // Temporary placeholder logic for testing:
-        const token = localStorage.getItem("auth-token");
-        if (token) {
-          setUser({ id: "1", email: "admin@securestorage.com" });
-        }
+        // Request the backend to validate the httpOnly cookie and return user info
+        const response = await apiClient.get("/auth/me");
+        setUser(response.data);
       } catch (error) {
-        console.error("Failed to verify session", error);
+        // If the backend returns a 401, the user is not authenticated
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -48,13 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkUserSession();
   }, []);
 
-  const login = (token: string, userData: User) => {
-    localStorage.setItem("auth-token", token);
+  // Update context immediately upon successful login API call
+  const login = (userData: User) => {
     setUser(userData);
   };
 
+  // Clear context (actual cookie removal & redirect should be handled in AuthAPI.logout)
   const logout = () => {
-    localStorage.removeItem("auth-token");
     setUser(null);
   };
 
@@ -65,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// 4. Custom hook to consume the context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

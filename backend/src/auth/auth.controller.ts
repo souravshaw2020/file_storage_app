@@ -1,12 +1,16 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   HttpCode,
   HttpStatus,
   Res,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { AuthGuard } from './auth.guard';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { type Response } from 'express';
 
@@ -56,5 +60,14 @@ export class AuthController {
     });
 
     return { message: 'Logged out successfully' };
+  }
+  // Required for the new useAuth.tsx frontend hook
+  @UseGuards(AuthGuard)
+  @Get('me')
+  getProfile(@Req() req: Request & { user: { sub: string; email: string } }) {
+    return {
+      id: req.user.sub,
+      email: req.user.email,
+    };
   }
 }
