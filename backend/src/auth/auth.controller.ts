@@ -18,6 +18,16 @@ import { type Response } from 'express';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // Required for the new useAuth.tsx frontend hook
+  @UseGuards(AuthGuard)
+  @Get('me')
+  getProfile(@Req() req: Request & { user: { sub: string; email: string } }) {
+    return {
+      id: req.user.sub,
+      email: req.user.email,
+    };
+  }
+
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
@@ -47,6 +57,7 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response): { message: string } {
     // Overwrite the cookie with a blank value and an expired date
@@ -60,14 +71,5 @@ export class AuthController {
     });
 
     return { message: 'Logged out successfully' };
-  }
-  // Required for the new useAuth.tsx frontend hook
-  @UseGuards(AuthGuard)
-  @Get('me')
-  getProfile(@Req() req: Request & { user: { sub: string; email: string } }) {
-    return {
-      id: req.user.sub,
-      email: req.user.email,
-    };
   }
 }
