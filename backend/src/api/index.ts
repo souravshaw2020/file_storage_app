@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
-
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { Request, Response } from 'express';
 
-let cachedServer: any;
+let cachedServer: (req: Request, res: Response) => void;
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: Request, res: Response) {
   if (!cachedServer) {
     const app = await NestFactory.create(AppModule);
 
@@ -21,7 +20,10 @@ export default async function handler(req: any, res: any) {
     ].filter(Boolean);
 
     app.enableCors({
-      origin: (origin, callback) => {
+      origin: (
+        origin: string | undefined,
+        callback: (err: Error | null, allow?: boolean) => void,
+      ) => {
         // allow no-origin requests (curl, server-to-server) and whitelisted origins
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
@@ -45,7 +47,10 @@ export default async function handler(req: any, res: any) {
     );
 
     await app.init();
-    cachedServer = app.getHttpAdapter().getInstance();
+    cachedServer = app.getHttpAdapter().getInstance() as (
+      req: Request,
+      res: Response,
+    ) => void;
   }
 
   return cachedServer(req, res);
