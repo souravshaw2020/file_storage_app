@@ -10,10 +10,28 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Enable CORS so the React/Next.js frontend can communicate with this API
+  const allowedOrigins = [
+    'http://localhost:3001',
+    'https://file-storage-app-frontend.vercel.app',
+    process.env.FRONTEND_URL, // in case it's set to something else in a given env
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    origin: (origin, callback) => {
+      // allow no-origin requests (curl, server-to-server) and whitelisted origins
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   });
+
+  // app.enableCors({
+  //   origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  //   credentials: true,
+  // });
 
   // Enable global validation for all incoming requests
   app.useGlobalPipes(
