@@ -12,6 +12,8 @@ export default async function handler(req: Request, res: Response) {
 
     app.use(cookieParser());
 
+    app.setGlobalPrefix('api');
+
     // Enable CORS so the React/Next.js frontend can communicate with this API
     const allowedOrigins = [
       'http://localhost:3001',
