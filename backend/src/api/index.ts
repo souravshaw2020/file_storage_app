@@ -10,9 +10,8 @@ export default async function handler(req: Request, res: Response) {
   if (!cachedServer) {
     const app = await NestFactory.create(AppModule);
 
-    app.use(cookieParser());
-
     app.setGlobalPrefix('api');
+    app.use(cookieParser());
 
     // Enable CORS so the React/Next.js frontend can communicate with this API
     const allowedOrigins = [
